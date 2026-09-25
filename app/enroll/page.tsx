@@ -4,18 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, CarFront, ChartNoAxesCombined, Gem, House, Landmark, Palette, Sailboat } from "lucide-react";
 import { trustClauses } from "@/lib/trust-wording";
-import { certificateSvg } from "@/lib/certificate-svg";
+import { assetIconPath, certificateSvg } from "@/lib/certificate-svg";
 import "./enroll.css";
 
 type Mode = "self" | "gift";
-type Asset = { id: string; category: string; name: string; value: string; holding: string; location: string; share: string; liability: string; notes: string; details: Record<string, string>; reference?: string; standard?: boolean };
+type Asset = { id: string; category: string; name: string; value: string; standard?: boolean };
 type Receipt = { number: string; started: Date };
-const categories = ["Real estate", "Bank accounts", "Investments", "Business interests", "Vehicles & vessels", "Art & collectibles", "Household property", "Digital assets", "Receivables", "Other interests"];
 const standardAssets = [
   { name: "Home", category: "Real estate", icon: House },
   { name: "Bank account", category: "Bank accounts", icon: Landmark },
@@ -26,37 +24,11 @@ const standardAssets = [
   { name: "Art", category: "Art & collectibles", icon: Palette },
   { name: "Jewelry", category: "Art & collectibles", icon: Gem },
 ];
-const luxuryCars = ["Aston Martin", "Bentley", "Bugatti", "Ferrari", "Lamborghini", "Maserati", "McLaren", "Mercedes-Maybach", "Porsche", "Rolls-Royce"];
-const otherCars = ["Acura", "Audi", "BMW", "Cadillac", "Chevrolet", "Ford", "Genesis", "Honda", "Hyundai", "Jaguar", "Jeep", "Land Rover", "Lexus", "Lucid", "Mercedes-Benz", "Rivian", "Subaru", "Tesla", "Toyota", "Volkswagen", "Volvo", "Other"];
-const luxuryBoats = ["Azimut", "Benetti", "Feadship", "Ferretti", "Lürssen", "Princess", "Riva", "Sunseeker", "Wally", "Westport"];
-const otherBoats = ["Bayliner", "Beneteau", "Boston Whaler", "Catalina", "Chaparral", "Grady-White", "Jeanneau", "Sea Ray", "Yamaha", "Other"];
-type DetailField = { key: string; label: string; placeholder?: string; options?: string[]; required?: boolean };
-const field = (key: string, label: string, placeholder?: string, required = false): DetailField => ({ key, label, placeholder, required });
-const detailFields: Record<string, DetailField[]> = {
-  Home: [field("propertyType", "Property type", "Residence, rental, land"), field("propertyLocation", "City, state / county", "e.g. Marin County, CA", true), field("parcel", "Parcel or deed reference (optional)", "Do not enter a full street address")],
-  "Bank account": [field("institution", "Bank or credit union", "e.g. First Republic", true), { key: "accountType", label: "Account type", options: ["Checking", "Savings", "Money market", "Certificate of deposit", "Other"], required: true }],
-  Portfolio: [field("custodian", "Brokerage or custodian", "e.g. Fidelity", true), { key: "accountType", label: "Account type", options: ["Taxable brokerage", "Retirement account", "Managed account", "Directly held securities", "Other"], required: true }, field("holdings", "Principal holdings / asset class", "e.g. index funds, bonds, private shares")],
-  Business: [field("entity", "Entity / business name", "e.g. Harbor Holdings LLC", true), { key: "entityType", label: "Entity type", options: ["LLC", "Corporation", "Partnership", "Sole proprietorship", "Other"] }, field("jurisdiction", "State / jurisdiction", "e.g. Delaware"), field("interest", "Class or units of interest", "e.g. 200 Class A units")],
-  Car: [{ key: "make", label: "Make", options: [...luxuryCars, ...otherCars], required: true }, field("model", "Model", "e.g. Phantom", true), field("year", "Year", "e.g. 2024", true), field("identifier", "VIN or plate ending (optional)", "Last few characters only")],
-  Boat: [{ key: "make", label: "Builder / make", options: [...luxuryBoats, ...otherBoats], required: true }, field("model", "Model / vessel name", "e.g. 68 Predator", true), field("year", "Year", "e.g. 2022"), field("identifier", "HIN or registration ending (optional)", "Last few characters only"), field("mooring", "Home port / mooring", "e.g. Sausalito")],
-  Art: [field("creator", "Artist / maker", "e.g. the artist's name", true), field("work", "Title / object", "e.g. Untitled, 2018", true), field("medium", "Medium / edition", "e.g. oil on canvas; edition 3 of 10"), field("provenance", "Provenance / appraisal", "e.g. gallery and appraisal year")],
-  Jewelry: [field("maker", "Maker / brand", "e.g. Cartier"), field("work", "Description", "e.g. platinum diamond ring", true), field("markings", "Materials / identifying marks", "e.g. 18k gold, maker's mark"), field("appraisal", "Appraisal year / reference", "e.g. 2025 appraisal")],
-  "Household property": [field("contents", "Contents or collection", "e.g. dining-room furnishings", true), field("propertyLocation", "General location", "e.g. main residence")],
-  "Digital assets": [field("platform", "Platform / custodian", "e.g. exchange or self-custody", true), field("assetType", "Asset type", "e.g. domain, crypto, royalties"), field("identifier", "Public reference (optional)", "Never enter keys or passwords")],
-  Receivables: [field("debtor", "Debtor / obligor", "Name of person or entity", true), field("instrument", "Note / contract description", "e.g. promissory note dated June 2025"), field("maturity", "Due date (if any)", "e.g. December 2027")],
-  "Vehicles & vessels": [field("vehicleType", "Vehicle / vessel type", "e.g. motorcycle, aircraft, sailboat"), field("maker", "Maker / builder", "e.g. Cessna"), field("model", "Model / name", "e.g. 182 Skylane"), field("year", "Year", "e.g. 2020"), field("identifier", "VIN, HIN or registration ending", "Last few characters only")],
-  "Other interests": [field("identifier", "Distinguishing reference", "e.g. contract date or collection name")],
-};
-const customFieldTypes: Record<string, string> = { "Real estate": "Home", "Bank accounts": "Bank account", Investments: "Portfolio", "Business interests": "Business", "Art & collectibles": "Art" };
-const fieldsFor = (asset: Asset): DetailField[] => detailFields[asset.standard ? asset.name : customFieldTypes[asset.category] || asset.category] ?? [];
-const demoAccountNumber = () => "DEMO-ACCT-" + String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
-const blankAsset = (): Asset => ({ id: Math.random().toString(36).slice(2), category: "Real estate", name: "", value: "", holding: "", location: "", share: "100", liability: "", notes: "", details: {} });
-const scheduleDetails = (asset: Asset) => fieldsFor(asset).map(({ key, label }) => asset.details[key]?.trim() && label.replace(/ \(.*\)/, "") + ": " + (key === "make" && asset.details.make === "Other" ? asset.details.otherMake || "Other" : asset.details[key].trim())).filter(Boolean);
-const assetTitle = (asset: Asset) => asset.name === "Car" || asset.name === "Boat" ? [asset.details.year, asset.details.make === "Other" ? asset.details.otherMake : asset.details.make, asset.details.model].filter(Boolean).join(" ") || asset.name : asset.name === "Business" ? asset.details.entity || asset.name : asset.name === "Art" ? asset.details.work || asset.name : asset.name === "Jewelry" ? asset.details.work || asset.name : asset.name;
+const blankAsset = (): Asset => ({ id: Math.random().toString(36).slice(2), category: "Other interests", name: "", value: "" });
 const currency = (amount: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
 
 function TrustInstrument({ assets, noLicense, signature, receipt }: { assets: Asset[]; noLicense: boolean; signature: string; receipt?: Receipt }) {
-  return <div className="deed trust-instrument"><div className="deed-top"><span className="brand-mark">G</span><span>CLIENT DOCUMENT · NONBINDING</span></div><h3 className="serif">The Twenty-Four Hour<br/>Relief Trust</h3><p className="deed-sub">Declaration and license · Schedule A attached{receipt && <> · {receipt.number}</>}</p><div className="deed-rule"/>{trustClauses(noLicense).map((clause, index) => <p key={clause.title}><b>{index + 1}. {clause.title}.</b> {clause.text}</p>)}<div className="deed-rule"/><span className="eyebrow">Schedule A · Listed assets</span><ol>{assets.map((asset) => <li key={asset.id}><b>{assetTitle(asset)}</b> · {asset.category} · Estimated whole-asset value {currency(Number(asset.value) || 0)} · {asset.share || "100"}% interest{asset.reference && " · Fictional account no.: " + asset.reference}{scheduleDetails(asset).map((detail) => " · " + detail)}{asset.holding && " · Held: " + asset.holding}{asset.location && " · Location/custodian: " + asset.location}{asset.liability && " · Obligation: " + asset.liability}{asset.notes && " · " + asset.notes}</li>)}</ol><p className="schedule-caveat">Account numbers are fabricated for this nonbinding schedule and do not identify accounts. Listing property here does not transfer title.</p><div className="deed-rule"/><div className="instrument-signature"><span className="eyebrow">Participant signature</span><div className="signature-preview" aria-label="Signature on instrument">{signature || "Sign here"}</div><small>{receipt ? `Applied ${receipt.started.toLocaleString()} · ${receipt.number}` : "Type your name below to preview your signature."}</small></div></div>;
+  return <div className="deed trust-instrument"><div className="deed-top"><span className="brand-mark">G</span><span>CLIENT DOCUMENT · NONBINDING</span></div><h3 className="serif">The Twenty-Four Hour<br/>Relief Trust</h3><p className="deed-sub">Declaration and license · Schedule A attached{receipt && <> · {receipt.number}</>}</p><div className="deed-rule"/>{trustClauses(noLicense).map((clause, index) => <p key={clause.title}><b>{index + 1}. {clause.title}.</b> {clause.text}</p>)}<div className="deed-rule"/><span className="eyebrow">Schedule A · Listed assets</span><ol>{assets.map((asset) => <li key={asset.id}><b>{asset.name}</b> · Estimated value {currency(Number(asset.value) || 0)}</li>)}</ol><p className="schedule-caveat">Listing property here does not transfer title.</p><div className="deed-rule"/><div className="instrument-signature"><span className="eyebrow">Participant signature</span><div className="signature-preview" aria-label="Signature on instrument">{signature || "Sign here"}</div><small>{receipt ? `Applied ${receipt.started.toLocaleString()} · ${receipt.number}` : "Type your name below to preview your signature."}</small></div></div>;
 }
 
 function EmbossedCertificate({ mode, receipt, recipient, signature, billingName, giftNote, assets, estimated, noLicense }: { mode: Mode; receipt: Receipt; recipient: string; signature: string; billingName: string; giftNote: string; assets: Asset[]; estimated: number; noLicense: boolean }) {
@@ -70,7 +42,8 @@ function EmbossedCertificate({ mode, receipt, recipient, signature, billingName,
       <p className="certificate-presented">{isGift ? "Presented with exquisite restraint to" : "Presented with great ceremony to"}</p>
       <p className="serif certificate-name">{isGift ? recipient : signature}</p>
       <div className="certificate-flourish" aria-hidden="true">✦</div>
-      <p className="certificate-description">{isGift ? "An invitation to enjoy twenty-four hours free from the cares of ownership. The recipient decides whether to participate." : <>For one day, {assets.length} listed {assets.length === 1 ? "asset" : "assets"} with a stated value of {currency(estimated)} {assets.length === 1 ? "is" : "are"} the trustee’s fictional concern. {noLicense ? "No use license is issued." : "Their use remains yours."}</>}</p>
+      <p className="certificate-description">{isGift ? "An invitation to enjoy twenty-four hours free from the cares of ownership. The recipient decides whether to participate." : <>For one day, {assets.length} listed {assets.length === 1 ? "asset becomes" : "assets become"} our trustee’s fictional concern. {noLicense ? "No use license is issued." : "Their use remains yours."}</>}</p>
+      {!isGift && <><div className="certificate-assets" aria-label="Listed assets">{assets.slice(0, 6).map((asset) => <div className="certificate-asset" key={asset.id}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={assetIconPath(asset.category, asset.name)}/></svg><span title={asset.name}>{asset.name}</span></div>)}</div>{assets.length > 6 && <span className="certificate-more">+ {assets.length - 6} more</span>}<p className="certificate-value"><span>Total given away</span><strong>{currency(estimated)}</strong></p></>}
       {isGift && giftNote && <p className="certificate-note">“{giftNote}”</p>}
       <div className="certificate-details"><div><small>{isGift ? "Presented by" : "Signed by"}</small><strong className="serif certificate-signature">{isGift ? billingName : signature}</strong></div><div><small>{isGift ? "Issued" : "Twenty-four-hour term"}</small><strong>{receipt.started.toLocaleString()} {isGift ? "" : "– " + new Date(receipt.started.getTime() + 86400000).toLocaleString()}</strong></div></div>
       <div className="certificate-bottom"><span>NO. {receipt.number}</span><span>COMMEMORATIVE · NONBINDING · NO ASSETS TRANSFERRED</span></div>
@@ -107,25 +80,21 @@ export default function Enroll() {
   }, []);
   useEffect(() => { window.scrollTo(0, 0); }, [step]);
   const total = 249 + (noLicense ? 99 : 0) + (mode === "self" && companion ? 149 : 0);
-  const estimated = assets.reduce((sum, asset) => sum + (Number(asset.value) || 0) * (Number(asset.share) || 0) / 100, 0);
+  const estimated = assets.reduce((sum, asset) => sum + (Number(asset.value) || 0), 0);
   const flow = mode === "gift" ? [{ id: 0, name: "Selection" }, { id: 3, name: "Checkout" }] : [{ id: 0, name: "Selection" }, { id: 1, name: "Inventory" }, { id: 2, name: "Signature" }, { id: 3, name: "Checkout" }];
   const currentIndex = flow.findIndex((item) => item.id === step);
-  const certificateDownload = receipt ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(certificateSvg({ mode, recipient, signature, billingName, giftNote, assetsCount: assets.length, estimated, noLicense, receipt })) : "";
+  const certificateDownload = receipt ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(certificateSvg({ mode, recipient, signature, billingName, giftNote, assets: assets.map(({ name, category }) => ({ name, category })), estimated, noLicense, receipt })) : "";
   const next = (destination: number) => { setError(""); setStep(destination); };
-  const updateAsset = (id: string, field: keyof Asset, value: string) => setAssets((old) => old.map((asset) => asset.id === id ? { ...asset, [field]: value, ...(field === "category" ? { details: {}, reference: ["Bank accounts", "Investments"].includes(value) ? demoAccountNumber() : undefined } : {}) } : asset));
-  const updateDetail = (id: string, key: string, value: string) => setAssets((old) => old.map((asset) => asset.id === id ? { ...asset, details: { ...asset.details, [key]: value } } : asset));
+  const updateAsset = (id: string, field: "name" | "value", value: string) => setAssets((old) => old.map((asset) => asset.id === id ? { ...asset, [field]: value } : asset));
   const addStandardAsset = (name: string, category: string) => {
-    const entry = { ...blankAsset(), name, category, standard: true, reference: ["Bank accounts", "Investments"].includes(category) ? demoAccountNumber() : undefined };
+    const entry = { ...blankAsset(), name, category, standard: true };
     setAssets((old) => [...old, entry]);
-    requestAnimationFrame(() => document.getElementById("asset-detail-" + entry.id + "-" + (fieldsFor(entry)[0]?.key ?? "value"))?.focus());
+    requestAnimationFrame(() => document.getElementById("asset-value-" + entry.id)?.focus());
   };
   const changeMode = (value: string) => { setMode(value as Mode); if (value === "gift") setCompanion(false); };
   const inventoryNext = () => {
     if (!assets.length) { setError("Add at least one asset to your schedule."); return; }
     if (assets.some((asset) => !asset.name.trim() || asset.value === "" || !Number.isFinite(Number(asset.value)) || Number(asset.value) < 0)) { setError("Please name and value each asset, or remove unfinished entries."); return; }
-    if (assets.some((asset) => fieldsFor(asset).some((field) => field.required && !asset.details[field.key]?.trim()))) { setError("Add the identifying details marked * for each asset."); return; }
-    if (assets.some((asset) => asset.details.make === "Other" && !asset.details.otherMake?.trim())) { setError("Specify the make or builder for each ‘Other’ selection."); return; }
-    if (assets.some((asset) => !Number.isFinite(Number(asset.share)) || Number(asset.share) <= 0 || Number(asset.share) > 100)) { setError("Enter an ownership share between 1% and 100% for each asset."); return; }
     if (!complete) { setError("Please confirm that your schedule is complete."); return; }
     next(2);
   };
@@ -165,29 +134,21 @@ export default function Enroll() {
           <div className="panel-actions"><button className="btn btn-dark" onClick={() => next(mode === "gift" ? 3 : 1)}>Continue to {mode === "gift" ? "checkout" : "inventory"}</button></div>
         </section>}
 
-        {step === 1 && <section className="panel" aria-labelledby="inventory-heading"><span className="eyebrow">02 / Schedule A</span><h2 id="inventory-heading" className="serif panel-title">Itemize your empire.</h2><p className="panel-intro">Choose an asset and give it a recognizable description and approximate value. Add custom interests as needed. Skip full account numbers, street addresses, VINs and passwords; account references here are invented.</p>
+        {step === 1 && <section className="panel" aria-labelledby="inventory-heading"><span className="eyebrow">02 / Schedule A</span><h2 id="inventory-heading" className="serif panel-title">Itemize your empire.</h2><p className="panel-intro">Select an asset icon, then enter its name and approximate value. Add a custom asset for anything else.</p>
           <h3 className="asset-picker-title serif">Select your assets</h3>
           <div className="asset-picker" aria-label="Standard assets">
             {standardAssets.map(({ name, category, icon: Icon }) => <button key={name} type="button" className="asset-tile" onClick={() => addStandardAsset(name, category)} aria-label={"Add " + name}><Icon size={30} strokeWidth={1.5} aria-hidden="true"/><span>{name}</span></button>)}
           </div>
           {assets.length === 0 && <p className="asset-empty">Your schedule is empty. Select an icon to begin.</p>}
-          {assets.map((asset, index) => <div className={"asset-card" + (asset.standard ? " standard-asset" : "")} key={asset.id}>
-            <div className="asset-header"><h3 className="serif">{asset.standard ? asset.name : "Custom asset " + String(index + 1).padStart(2, "0")}</h3><button type="button" className="text-button" onClick={() => setAssets((old) => old.filter((entry) => entry.id !== asset.id))} aria-label={"Remove " + (asset.name || "custom asset")}>Remove</button></div>
+          {assets.map((asset, index) => <div className="asset-card" key={asset.id}>
+            <div className="asset-header"><h3 className="serif">{asset.name || "Custom asset " + String(index + 1).padStart(2, "0")}</h3><button type="button" className="text-button" onClick={() => setAssets((old) => old.filter((entry) => entry.id !== asset.id))} aria-label={"Remove " + (asset.name || "custom asset")}>Remove</button></div>
             <div className="field-grid">
-              {!asset.standard && <><div className="field"><label htmlFor={"asset-category-" + asset.id}>Asset class</label><Select value={asset.category} onValueChange={(value) => updateAsset(asset.id, "category", value)}><SelectTrigger id={"asset-category-" + asset.id} className="field-control"><SelectValue/></SelectTrigger><SelectContent>{categories.map((cat) => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}</SelectContent></Select></div><div className="field"><label htmlFor={"asset-name-" + asset.id}>Description / title *</label><Input id={"asset-name-" + asset.id} className="field-control" value={asset.name} onChange={(e) => updateAsset(asset.id, "name", e.target.value)} placeholder="e.g. The coastal house"/></div></>}
-              {fieldsFor(asset).map((detail) => <div className="field" key={detail.key}><label htmlFor={"asset-detail-" + asset.id + "-" + detail.key}>{detail.label}{detail.required ? " *" : ""}</label>{detail.options ? <Select value={asset.details[detail.key] || undefined} onValueChange={(value) => updateDetail(asset.id, detail.key, value)}><SelectTrigger id={"asset-detail-" + asset.id + "-" + detail.key} className="field-control"><SelectValue placeholder="Select one"/></SelectTrigger><SelectContent>{detail.key === "make" && <><SelectGroup><SelectLabel>{asset.name === "Car" ? "Luxury marques" : "Luxury builders"}</SelectLabel>{detail.options.slice(0, asset.name === "Car" ? luxuryCars.length : luxuryBoats.length).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectGroup><SelectGroup><SelectLabel>Other makes</SelectLabel>{detail.options.slice(asset.name === "Car" ? luxuryCars.length : luxuryBoats.length).map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectGroup></>}{detail.key !== "make" && detail.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select> : <Input id={"asset-detail-" + asset.id + "-" + detail.key} className="field-control" value={asset.details[detail.key] || ""} onChange={(e) => updateDetail(asset.id, detail.key, e.target.value)} placeholder={detail.placeholder}/>}</div>)}
-              {asset.details.make === "Other" && <div className="field"><label htmlFor={"asset-other-make-" + asset.id}>Specify make / builder *</label><Input id={"asset-other-make-" + asset.id} className="field-control" value={asset.details.otherMake || ""} onChange={(e) => updateDetail(asset.id, "otherMake", e.target.value)} placeholder="Enter the maker"/></div>}
-              {asset.reference && <div className="field"><span className="field-label">Fictional account number</span><div className="mock-reference">{asset.reference}</div><small>Generated for this keepsake; no real account is identified.</small></div>}
-              <div className="field"><label htmlFor={"asset-value-" + asset.id}>Approximate value (USD) *</label><Input id={"asset-value-" + asset.id} className="field-control" type="number" min="0" value={asset.value} onChange={(e) => updateAsset(asset.id, "value", e.target.value)} placeholder="0"/></div>
-              <div className="field"><label htmlFor={"asset-share-" + asset.id}>Ownership share (%) *</label><Input id={"asset-share-" + asset.id} className="field-control" type="number" min="1" max="100" value={asset.share} onChange={(e) => updateAsset(asset.id, "share", e.target.value)}/></div>
-              <div className="field"><label htmlFor={"asset-holding-" + asset.id}>Title / how held</label><Input id={"asset-holding-" + asset.id} className="field-control" value={asset.holding} onChange={(e) => updateAsset(asset.id, "holding", e.target.value)} placeholder="e.g. Solely, jointly, through an LLC"/></div>
-              <div className="field"><label htmlFor={"asset-location-" + asset.id}>Other location / custodian</label><Input id={"asset-location-" + asset.id} className="field-control" value={asset.location} onChange={(e) => updateAsset(asset.id, "location", e.target.value)} placeholder="e.g. stored in a gallery"/></div>
-              <div className="field full"><label htmlFor={"asset-liability-" + asset.id}>Debt, lien or upkeep</label><Input id={"asset-liability-" + asset.id} className="field-control" value={asset.liability} onChange={(e) => updateAsset(asset.id, "liability", e.target.value)} placeholder="e.g. mortgage, loan, insurance, maintenance"/></div>
-              <div className="field full"><label htmlFor={"asset-notes-" + asset.id}>Additional distinguishing details</label><Textarea id={"asset-notes-" + asset.id} className="field-control" value={asset.notes} onChange={(e) => updateAsset(asset.id, "notes", e.target.value)} placeholder="Condition or other facts affecting the description or value" rows={2}/></div>
+              <div className="field"><label htmlFor={"asset-name-" + asset.id}>Asset name *</label><Input id={"asset-name-" + asset.id} className="field-control" value={asset.name} onChange={(e) => updateAsset(asset.id, "name", e.target.value)} placeholder={asset.standard ? "e.g. Coastal home" : "e.g. Family vineyard"}/></div>
+              <div className="field"><label htmlFor={"asset-value-" + asset.id}>Amount (USD) *</label><Input id={"asset-value-" + asset.id} className="field-control" type="number" min="0" value={asset.value} onChange={(e) => updateAsset(asset.id, "value", e.target.value)} placeholder="0"/></div>
             </div>
           </div>)}
           <button type="button" className="btn btn-outline add-asset" onClick={() => setAssets((old) => [...old, blankAsset()])}>+ Add custom asset</button>
-          <div className="inventory-total"><span>Scheduled interest value</span><strong>{assets.length} {assets.length === 1 ? "entry" : "entries"} · {currency(estimated)}</strong></div>
+          <div className="inventory-total"><span>Total listed value</span><strong>{assets.length} {assets.length === 1 ? "asset" : "assets"} · {currency(estimated)}</strong></div>
           <label className="confirm-row"><Checkbox checked={complete} onCheckedChange={(value) => setComplete(Boolean(value))}/><span>This is the complete schedule I want to use for this engagement.</span></label>
           {error && <p className="form-error" role="alert">{error}</p>}
           <div className="panel-actions"><button className="btn btn-outline" onClick={() => next(0)}>Back</button><button className="btn btn-dark" onClick={inventoryNext}>Review instrument</button></div>
