@@ -58,7 +58,6 @@ export default function Enroll() {
   const [noLicense, setNoLicense] = useState(false);
   const [companion, setCompanion] = useState(false);
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [complete, setComplete] = useState(false);
   const [signature, setSignature] = useState("");
   const [signAccepted, setSignAccepted] = useState(false);
   const [authorityAccepted, setAuthorityAccepted] = useState(false);
@@ -95,7 +94,6 @@ export default function Enroll() {
   const inventoryNext = () => {
     if (!assets.length) { setError("Add at least one asset to your schedule."); return; }
     if (assets.some((asset) => !asset.name.trim() || asset.value === "" || !Number.isFinite(Number(asset.value)) || Number(asset.value) < 0)) { setError("Please name and value each asset, or remove unfinished entries."); return; }
-    if (!complete) { setError("Please confirm that your schedule is complete."); return; }
     next(2);
   };
   const signNext = () => {
@@ -149,7 +147,6 @@ export default function Enroll() {
           </div>)}
           <button type="button" className="btn btn-outline add-asset" onClick={() => setAssets((old) => [...old, blankAsset()])}>+ Add custom asset</button>
           <div className="inventory-total"><span>Total listed value</span><strong>{assets.length} {assets.length === 1 ? "asset" : "assets"} · {currency(estimated)}</strong></div>
-          <label className="confirm-row"><Checkbox checked={complete} onCheckedChange={(value) => setComplete(Boolean(value))}/><span>This is the complete schedule I want to use for this engagement.</span></label>
           {error && <p className="form-error" role="alert">{error}</p>}
           <div className="panel-actions"><button className="btn btn-outline" onClick={() => next(0)}>Back</button><button className="btn btn-dark" onClick={inventoryNext}>Review instrument</button></div>
         </section>}
