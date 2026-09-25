@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
   return <main>
     <section className="home-hero">
-      <div className="hero-copy"><span className="eyebrow">A private holiday from ownership</span><h1 className="serif">All yours.<br/><em>Not your problem.</em></h1><p>For twenty-four exquisite hours, you keep the use of what you own. The trustee takes responsibility for its liabilities, its upkeep, and preserving its value—and shoulders the mental burden of keeping track of it all.</p><a href="/enroll" className="btn btn-gold">Begin your 24 hours <span aria-hidden="true">↗</span></a></div>
+      <div className="hero-copy"><span className="eyebrow">A private holiday from ownership</span><h1 className="serif">All yours.<br/><em>Someone else’s mental burden.</em></h1><p>For twenty-four exquisite hours, you keep the use of what you own. The trustee takes responsibility for its liabilities, its upkeep, and preserving its value—and shoulders the mental burden of keeping track of it all.</p><a href="/enroll" className="btn btn-gold">Begin your 24 hours <span aria-hidden="true">↗</span></a></div>
       <div className="hero-image" role="img" aria-label="Elegant yacht on the Atlantic coast with friends enjoying the afternoon"><span className="image-stamp">The art of temporary nothing</span></div>
     </section>
     <div className="ribbon">One day of freedom &nbsp; · &nbsp; 24 hours of exquisite perspective &nbsp; · &nbsp; Everything returns at the end</div>
