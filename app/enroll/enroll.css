@@ -93,6 +93,7 @@ textarea.field-control { min-height: 85px; }
 .certificate-masthead { width: 100%; display: flex; justify-content: space-between; gap: 1rem; font-size: .67rem; font-weight: 700; letter-spacing: .18em; color: #745a37; }
 .certificate-seal { width: 92px; height: 92px; flex: none; border-radius: 50%; margin: 1.2rem 0 .85rem; display: grid; place-items: center; font: italic 3.4rem Georgia, serif; color: #624822; text-shadow: 1px 1px 0 #fff1bf, -1px -1px 1px #765322; border: 5px double #84622d; background: radial-gradient(circle at 32% 27%, #ffefba, #d7b66e 53%, #a77d3f 80%, #f4dd9b); box-shadow: 3px 4px 6px #71532e64, inset 2px 2px 4px #fff5d6, inset -3px -3px 6px #74502480; }
 .certificate-kicker { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: #8a6a3f; margin: .35rem 0; }
+.certificate-tier { color: #926d3a; font: italic 1.1rem Georgia, serif; margin: .2rem 0; }
 .certificate-title { max-width: 650px; font-size: clamp(2rem, 4.2vw, 3.5rem); line-height: 1.1; letter-spacing: -.05em; font-weight: 400; margin: .75rem 0 1.15rem; color: #213848; }
 .certificate-presented { color: #6f6860; margin: .35rem 0; font-size: .9rem; }
 .certificate-name { font-size: clamp(2rem, 4.8vw, 4rem); line-height: 1.12; margin: .35rem 0; color: #8d6939; text-shadow: 1px 1px 0 #fff, 2px 2px 2px #b49b7752; }

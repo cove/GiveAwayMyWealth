@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, CarFront, ChartNoAxesCombined, Gem, House, Landmark, Palette, Sailboat } from "lucide-react";
 import { trustClauses } from "@/lib/trust-wording";
-import { assetIconPath, certificateSvg } from "@/lib/certificate-svg";
+import { assetIconPath, certificateSvg, wealthLevel } from "@/lib/certificate-svg";
 import "./enroll.css";
 
 type Mode = "self" | "gift";
@@ -38,6 +38,7 @@ function EmbossedCertificate({ mode, receipt, recipient, signature, billingName,
       <div className="certificate-masthead"><span>GIVEAWAYMYWEALTH</span><span>PRIVATE CLIENT OFFICE · EST. FOR ONE DAY</span></div>
       <div className="certificate-seal" aria-hidden="true"><span>G</span></div>
       <p className="certificate-kicker">Certificate of {isGift ? "an exceptional invitation" : "temporary relief"}</p>
+      {!isGift && <p className="certificate-tier">{wealthLevel(estimated)} level</p>}
       <h3 className="serif certificate-title">{isGift ? "The gift of having nothing." : "A day without the weight of it all."}</h3>
       <p className="certificate-presented">{isGift ? "Presented with exquisite restraint to" : "Presented with great ceremony to"}</p>
       <p className="serif certificate-name">{isGift ? recipient : signature}</p>
@@ -45,7 +46,7 @@ function EmbossedCertificate({ mode, receipt, recipient, signature, billingName,
       <p className="certificate-description">{isGift ? "An invitation to enjoy twenty-four hours free from the cares of ownership. The recipient decides whether to participate." : <>For one day, {assets.length} listed {assets.length === 1 ? "asset becomes" : "assets become"} our trustee’s fictional concern. {noLicense ? "No use license is issued." : "Their use remains yours."}</>}</p>
       {!isGift && <><div className="certificate-assets" aria-label="Listed assets">{assets.slice(0, 6).map((asset) => <div className="certificate-asset" key={asset.id}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={assetIconPath(asset.category, asset.name)}/></svg><span title={asset.name}>{asset.name}</span></div>)}</div>{assets.length > 6 && <span className="certificate-more">+ {assets.length - 6} more</span>}<p className="certificate-value"><span>Total given away</span><strong>{currency(estimated)}</strong></p></>}
       {isGift && giftNote && <p className="certificate-note">“{giftNote}”</p>}
-      <div className="certificate-details"><div><small>{isGift ? "Presented by" : "Signed by"}</small><strong className="serif certificate-signature">{isGift ? billingName : signature}</strong></div><div><small>{isGift ? "Issued" : "Twenty-four-hour term"}</small><strong>{receipt.started.toLocaleString()} {isGift ? "" : "– " + new Date(receipt.started.getTime() + 86400000).toLocaleString()}</strong></div></div>
+      <div className="certificate-details"><div><small>{isGift ? "Presented by" : "Signed by"}</small><strong className="serif certificate-signature">{isGift ? billingName : signature}</strong></div><div><small>{isGift ? "Issued" : "Begins"}</small><strong>{receipt.started.toLocaleString()}</strong></div>{!isGift && <div><small>Ends</small><strong>{new Date(receipt.started.getTime() + 86_400_000).toLocaleString()}</strong></div>}</div>
       <div className="certificate-bottom"><span>NO. {receipt.number}</span><span>COMMEMORATIVE · NONBINDING · NO ASSETS TRANSFERRED</span></div>
     </div>
   </div>;

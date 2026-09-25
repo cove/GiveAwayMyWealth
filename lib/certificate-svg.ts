@@ -13,6 +13,14 @@ type CertificateDetails = {
 const xml = (text: string) => text.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[character] ?? character);
 const money = (amount: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
 
+export function wealthLevel(amount: number) {
+  if (amount > 900_000_000) return "Camel Through the Needle’s Eye";
+  if (amount >= 200_000_000) return "Platinum";
+  if (amount >= 25_000_000) return "Gold";
+  if (amount >= 5_000_000) return "Silver";
+  return "Bronze";
+}
+
 export function assetIconPath(category: string, name: string) {
   if (name === "Home" || category === "Real estate") return "M3 10 12 3l9 7 M5 9v12h14V9 M9 21v-7h6v7";
   if (name === "Bank account" || category === "Bank accounts") return "M3 9h18 M5 9v10 M10 9v10 M14 9v10 M19 9v10 M3 20h18 M12 3 2 8h20L12 3Z";
@@ -27,6 +35,7 @@ export function assetIconPath(category: string, name: string) {
 
 export function certificateSvg(details: CertificateDetails) {
   const gift = details.mode === "gift";
+  const level = wealthLevel(details.estimated);
   const name = xml(gift ? details.recipient : details.signature);
   const subtitle = gift ? "THE GIFT OF HAVING NOTHING" : "A DAY WITHOUT THE WEIGHT OF IT ALL";
   const mainLine = gift ? "An invitation to enjoy twenty-four hours free from the cares of ownership." : "For one day, " + details.assets.length + " listed " + (details.assets.length === 1 ? "asset becomes" : "assets become") + " our trustee’s fictional concern.";
@@ -40,6 +49,7 @@ export function certificateSvg(details: CertificateDetails) {
   }).join("") + (details.assets.length > 6 ? '<text x="600" y="718" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#665844">+ ' + (details.assets.length - 6) + ' more</text>' : "");
   const total = gift ? "" : '<text x="600" y="' + (details.assets.length > 6 ? "746" : "728") + '" text-anchor="middle" font-family="Georgia,serif" font-size="26" fill="#775b38">TOTAL GIVEN AWAY  ' + xml(money(details.estimated)) + "</text>";
   const date = details.receipt.started.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  const endDate = new Date(details.receipt.started.getTime() + 86_400_000).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
   const giftNote = details.giftNote.trim().replace(/\s+/g, " ");
   const note = gift && giftNote ? '<text x="600" y="685" text-anchor="middle" font-family="Georgia,serif" font-size="20" font-style="italic" fill="#755a39">“' + xml(giftNote.length > 70 ? giftNote.slice(0, 69) + "…" : giftNote) + '”</text>' : "";
   const nameScale = name.length > 27 ? ' textLength="870" lengthAdjust="spacingAndGlyphs"' : "";
@@ -54,7 +64,8 @@ export function certificateSvg(details: CertificateDetails) {
     '<text x="600" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="5" fill="#775b38">GIVEAWAYMYWEALTH · PRIVATE CLIENT OFFICE</text>' +
     '<circle cx="600" cy="236" r="76" fill="url(#foil)" stroke="#795a30" stroke-width="4" filter="url(#emboss)"/><circle cx="600" cy="236" r="64" fill="none" stroke="#f8e4af" stroke-width="4"/><circle cx="600" cy="236" r="54" fill="none" stroke="#7b5b31" stroke-width="2"/>' +
     '<text x="600" y="263" text-anchor="middle" font-family="Georgia,serif" font-size="83" font-style="italic" fill="#634724">G</text>' +
-    '<text x="600" y="357" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" letter-spacing="5" fill="#826541">CERTIFICATE OF ' + (gift ? "AN EXCEPTIONAL INVITATION" : "TEMPORARY RELIEF") + "</text>" +
+    '<text x="600" y="347" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" letter-spacing="5" fill="#826541">CERTIFICATE OF ' + (gift ? "AN EXCEPTIONAL INVITATION" : "TEMPORARY RELIEF") + "</text>" +
+    (gift ? "" : '<text x="600" y="374" text-anchor="middle" font-family="Georgia,serif" font-size="20" font-style="italic" fill="#926d3a">' + xml(level.toUpperCase()) + ' LEVEL</text>') +
     '<text x="600" y="422" text-anchor="middle" font-family="Georgia,serif" font-size="43" fill="#263b48">' + subtitle + "</text>" +
     '<text x="600" y="474" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#746a5e">Presented with great ceremony to</text>' +
     '<text x="600" y="548" text-anchor="middle" font-family="Georgia,serif" font-size="61" fill="#906c3c" filter="url(#emboss)"' + nameScale + ">" + name + "</text>" +
@@ -66,8 +77,9 @@ export function certificateSvg(details: CertificateDetails) {
     '<path d="M115 ' + (gift ? 711 : details.assets.length > 6 ? 765 : 750) + 'H1085" stroke="#c0a371" stroke-width="2"/>' +
     '<text x="135" y="' + (gift ? 753 : details.assets.length > 6 ? 788 : 777) + '" font-family="Arial,sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#7c664b">' + (gift ? "PRESENTED BY" : "SIGNED BY") + "</text>" +
     '<text x="135" y="' + (gift ? 792 : details.assets.length > 6 ? 812 : 806) + '" font-family="Georgia,serif" font-size="27" font-style="italic" fill="#354650">' + xml(gift ? details.billingName : details.signature) + "</text>" +
-    '<text x="1065" y="' + (gift ? 753 : details.assets.length > 6 ? 788 : 777) + '" text-anchor="end" font-family="Arial,sans-serif" font-size="14" letter-spacing="2" fill="#7c664b">ISSUED</text>' +
-    '<text x="1065" y="' + (gift ? 792 : details.assets.length > 6 ? 812 : 806) + '" text-anchor="end" font-family="Georgia,serif" font-size="22" fill="#354650">' + xml(date) + "</text>" +
+    (gift
+      ? '<text x="1065" y="753" text-anchor="end" font-family="Arial,sans-serif" font-size="14" letter-spacing="2" fill="#7c664b">ISSUED</text><text x="1065" y="792" text-anchor="end" font-family="Georgia,serif" font-size="22" fill="#354650">' + xml(date) + "</text>"
+      : '<text x="590" y="' + (details.assets.length > 6 ? 788 : 777) + '" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" letter-spacing="2" fill="#7c664b">BEGINS</text><text x="590" y="' + (details.assets.length > 6 ? 812 : 806) + '" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#354650">' + xml(date) + '</text><text x="1065" y="' + (details.assets.length > 6 ? 788 : 777) + '" text-anchor="end" font-family="Arial,sans-serif" font-size="13" letter-spacing="2" fill="#7c664b">ENDS</text><text x="1065" y="' + (details.assets.length > 6 ? 812 : 806) + '" text-anchor="end" font-family="Georgia,serif" font-size="18" fill="#354650">' + xml(endDate) + "</text>") +
     '<path d="M115 ' + (gift ? 813 : details.assets.length > 6 ? 827 : 823) + 'H1085" stroke="#d0bd97" stroke-width="1"/>' +
     '<text x="135" y="' + (gift ? 838 : details.assets.length > 6 ? 845 : 840) + '" font-family="Arial,sans-serif" font-size="13" letter-spacing="2" fill="#705e47">NO. ' + xml(details.receipt.number) + "</text>" +
     '<text x="1065" y="' + (gift ? 838 : details.assets.length > 6 ? 845 : 840) + '" text-anchor="end" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#705e47">COMMEMORATIVE · NONBINDING · NO ASSETS TRANSFERRED</text></svg>';
