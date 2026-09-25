@@ -4,19 +4,21 @@ type CertificateDetails = {
   signature: string;
   billingName: string;
   giftNote: string;
-  trustName: string;
+  assetsCount: number;
+  estimated: number;
+  noLicense: boolean;
   receipt: { number: string; started: Date };
 };
 
 const xml = (text: string) => text.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[character] ?? character);
+const money = (amount: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
 
 export function certificateSvg(details: CertificateDetails) {
   const gift = details.mode === "gift";
   const name = xml(gift ? details.recipient : details.signature);
-  const subtitle = gift ? "THE GIFT OF A DAY OFF" : "A DAY WITHOUT THE WEIGHT OF IT ALL";
-  const trustLabel = details.trustName.trim().length > 60 ? details.trustName.trim().slice(0, 59) + "…" : details.trustName.trim();
-  const mainLine = gift ? "An invitation to imagine a day away from serving as trustee." : "For one day, " + trustLabel + " is in other hands, in imagination.";
-  const secondLine = gift ? "The recipient decides whether to participate." : "The trust and its beneficial ownership remain unchanged.";
+  const subtitle = gift ? "THE GIFT OF HAVING NOTHING" : "A DAY WITHOUT THE WEIGHT OF IT ALL";
+  const mainLine = gift ? "An invitation to enjoy twenty-four hours free from the cares of ownership." : "For one day, " + details.assetsCount + " listed " + (details.assetsCount === 1 ? "asset" : "assets") + " with a stated value of " + money(details.estimated);
+  const secondLine = gift ? "The recipient decides whether to participate." : (details.assetsCount === 1 ? "is" : "are") + " the trustee’s fictional concern. " + (details.noLicense ? "No use license is issued." : "Their use remains yours.");
   const date = details.receipt.started.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
   const giftNote = details.giftNote.trim().replace(/\s+/g, " ");
   const note = gift && giftNote ? '<text x="600" y="685" text-anchor="middle" font-family="Georgia,serif" font-size="20" font-style="italic" fill="#755a39">“' + xml(giftNote.length > 70 ? giftNote.slice(0, 69) + "…" : giftNote) + '”</text>' : "";
@@ -47,5 +49,5 @@ export function certificateSvg(details: CertificateDetails) {
     '<text x="1065" y="792" text-anchor="end" font-family="Georgia,serif" font-size="22" fill="#354650">' + xml(date) + "</text>" +
     '<path d="M115 813H1085" stroke="#d0bd97" stroke-width="1"/>' +
     '<text x="135" y="838" font-family="Arial,sans-serif" font-size="13" letter-spacing="2" fill="#705e47">NO. ' + xml(details.receipt.number) + "</text>" +
-    '<text x="1065" y="838" text-anchor="end" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#705e47">COMMEMORATIVE · NONBINDING · NO TRUSTEE APPOINTED</text></svg>';
+    '<text x="1065" y="838" text-anchor="end" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#705e47">COMMEMORATIVE · NONBINDING · NO ASSETS TRANSFERRED</text></svg>';
 }
