@@ -1,0 +1,27 @@
+.junior-page { background: #e8e5dc; padding-bottom: 7rem; min-height: 100vh; }
+.junior-heading { background: #172d3b; color: #f6f2e8; padding: 6rem 0 8rem; }
+.junior-heading .eyebrow { color: #d7c296; }
+.junior-heading h1 { font-size: clamp(3.5rem, 7vw, 8rem); letter-spacing: -.07em; line-height: .95; margin: 1.4rem 0; }
+.junior-heading h1 em { color: #d8c39e; }
+.junior-heading p { max-width: 650px; font-size: 1.12rem; line-height: 1.7; color: #c9d3d2; }
+.junior-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 2rem; margin-top: -4rem; position: relative; align-items: start; }
+.junior-panel { background: #fbfaf6; padding: clamp(1.5rem, 4vw, 4rem); border: 1px solid #c6c5b8; min-height: 570px; }
+.junior-panel h2 { font-size: clamp(2.5rem, 4.4vw, 5rem); line-height: 1.08; letter-spacing: -.06em; margin: 1.2rem 0 2.5rem; }
+.junior-options { grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+.junior-action { margin-top: 2.2rem; }
+.junior-aside { background: #dfd1b4; padding: 2rem; border: 1px solid #bcaa89; }
+.junior-aside h2 { font-size: 2.4rem; line-height: 1.1; letter-spacing: -.05em; margin: 1.4rem 0; }
+.junior-aside p { line-height: 1.65; color: #495b63; }
+.junior-aside-rule { border-top: 1px solid #aa9c80; margin: 1.6rem 0; }
+.junior-aside > strong { display: block; font: 2rem Georgia, serif; margin: .3rem 0 1.7rem; }
+.junior-deed { background: white; border: 1px solid #b7b9b1; padding: clamp(1.5rem, 3vw, 3rem); }
+.junior-deed h3 { font-size: clamp(2.1rem, 3vw, 3.4rem); line-height: 1.1; letter-spacing: -.05em; font-weight: 400; margin: 2rem 0; }
+.junior-deed p { color: #394e59; line-height: 1.75; }
+.junior-note { color: #5e7077; font-size: .86rem; line-height: 1.6; }
+.junior-lead { font-size: 1.2rem; color: #4a5d64; line-height: 1.7; }
+.junior-certificate { background: #dcd0b6; border: 1px solid #b9aa89; padding: clamp(1.5rem, 3vw, 3rem); min-height: 450px; display: flex; flex-direction: column; justify-content: space-between; margin-top: 2.5rem; }
+.junior-cert-title { font-size: clamp(2.7rem, 5vw, 5.5rem); letter-spacing: -.065em; line-height: 1; margin: 2rem 0; }
+.junior-certificate p { margin: .3rem 0 1.2rem; }
+@media (max-width: 950px) { .junior-layout { grid-template-columns: 1fr; } .junior-aside { display: none; } }
+@media (max-width: 620px) { .junior-heading { padding: 5rem 0 6rem; } .junior-layout { margin-top: -2rem; } .junior-options { grid-template-columns: 1fr; } }
+@media print { .site-header, .site-footer, .junior-heading, .junior-aside, .panel-actions, .junior-note { display: none !important; } .junior-layout { display: block; margin: 0; width: 100%; } .junior-panel { border: 0; padding: 0; min-height: 0; } }
