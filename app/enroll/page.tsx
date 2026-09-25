@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
@@ -174,10 +173,10 @@ export default function Enroll() {
           {(mode === "gift" || companion) && <div className="invitation-actions"><p>{mode === "gift" ? "Share the invitation with the recipient. They make their own choices and sign only for themselves." : "Share this separate invitation with " + companionName + ". No one else’s assets are included in your instrument."}</p><button className="btn btn-outline" onClick={copyInvite}>{copied ? "Invitation copied" : "Copy invitation text"}</button></div>}
           <div className="receipt-box"><div><span>Reference</span><b>{receipt.number}</b></div><div><span>Reference total</span><b>{currency(total)}</b></div><div><span>Amount charged</span><b>$0</b></div><div><span>Payment method</span><b>{payment === "card" ? "Reference card" : "Private client invoice"}</b></div></div>
           <p className="input-note">No purchase or asset transfer occurred. Your entries disappear when you leave or reload the tab.</p>
-          <div className="panel-actions"><a className="btn btn-dark" href={certificateDownload} download={"GiveAwayMyWealth-" + receipt.number + ".svg"}>Download certificate</a><button className="btn btn-outline" onClick={() => window.print()}>Print / save PDF</button><Link href="/" className="btn btn-outline">Return to the estate</Link></div>
+          <div className="panel-actions"><a className="btn btn-dark" href={certificateDownload} download={"GiveAwayMyWealth-" + receipt.number + ".svg"}>Download certificate</a><button className="btn btn-outline" onClick={() => window.print()}>Print / save PDF</button><a href="/" className="btn btn-outline">Return to the estate</a></div>
         </section>}
       </div>
-      <aside className="summary" aria-label="Order summary"><span className="eyebrow">Your selection</span><h2 className="serif">Twenty-four hours,<br/>beautifully arranged.</h2><div className="summary-line"><span>{mode === "gift" ? "Wealth Holiday gift" : "Wealth Holiday"}</span><b>$249</b></div>{noLicense && <div className="summary-line"><span>Nothing Licensed Back</span><b>$99</b></div>}{mode === "self" && companion && <div className="summary-line"><span>Companion Release</span><b>$149</b></div>}<div className="summary-total"><span>Reference total</span><b>{currency(total)}</b></div><p>Reference prices. Actual amount charged: <strong>$0</strong>. All information stays in this browser tab.</p><Link href="/arrangement">Read the arrangement</Link></aside>
+      <aside className="summary" aria-label="Order summary"><span className="eyebrow">Your selection</span><h2 className="serif">Twenty-four hours,<br/>beautifully arranged.</h2><div className="summary-line"><span>{mode === "gift" ? "Wealth Holiday gift" : "Wealth Holiday"}</span><b>$249</b></div>{noLicense && <div className="summary-line"><span>Nothing Licensed Back</span><b>$99</b></div>}{mode === "self" && companion && <div className="summary-line"><span>Companion Release</span><b>$149</b></div>}<div className="summary-total"><span>Reference total</span><b>{currency(total)}</b></div><p>Reference prices. Actual amount charged: <strong>$0</strong>. All information stays in this browser tab.</p><a href="/arrangement">Read the arrangement</a></aside>
     </div>
   </main>;
 }
