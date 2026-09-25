@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, CarFront, ChartNoAxesCombined, Gem, House, Landmark, Palette, Sailboat } from "lucide-react";
 import { trustClauses } from "@/lib/trust-wording";
-import { assetIconPath, certificateSvg, wealthLevel, wealthTierColor } from "@/lib/certificate-svg";
+import { assetIconPath, certificateSvg, rainbowBands, wealthLevel, wealthTierColor } from "@/lib/certificate-svg";
 import "./enroll.css";
 
 type Mode = "self" | "gift";
@@ -42,7 +42,7 @@ function EmbossedCertificate({ mode, receipt, recipient, signature, billingName,
       <h3 className="serif certificate-title">{isGift ? "The gift of having nothing." : "A day without the weight of it all."}</h3>
       <p className="certificate-presented">{isGift ? "Presented with exquisite restraint to" : "Presented with great ceremony to"}</p>
       <p className="serif certificate-name">{isGift ? recipient : signature}</p>
-      <div className="certificate-flourish" aria-hidden="true">✦</div>
+      {noLicense ? <svg className="certificate-rainbow" viewBox="0 0 76 36" aria-label="Rainbow for Nothing Licensed Back">{rainbowBands.map((color, index) => { const radius = 30 - index * 3; return <path key={color} d={`M${38 - radius} 34 Q38 ${34 - radius * 2} ${38 + radius} 34`} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round"/>; })}</svg> : <div className="certificate-flourish" aria-hidden="true">✦</div>}
       <p className="certificate-description">{isGift ? "An invitation to enjoy twenty-four hours free from the cares of ownership. The recipient decides whether to participate." : <>For one day, {assets.length} listed {assets.length === 1 ? "asset becomes" : "assets become"} our trustee’s fictional concern. {noLicense ? "No use license is issued." : "Their use remains yours."}</>}</p>
       {!isGift && <><div className="certificate-assets" aria-label="Listed assets">{assets.slice(0, 6).map((asset) => <div className="certificate-asset" key={asset.id}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={assetIconPath(asset.category, asset.name)}/></svg><span title={asset.name}>{asset.name}</span></div>)}</div>{assets.length > 6 && <span className="certificate-more">+ {assets.length - 6} more</span>}<p className="certificate-value"><span>Total given away</span><strong>{currency(estimated)}</strong></p></>}
       {isGift && giftNote && <p className="certificate-note">“{giftNote}”</p>}

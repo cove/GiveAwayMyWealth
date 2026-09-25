@@ -102,6 +102,7 @@ textarea.field-control { min-height: 85px; }
 .certificate-presented { color: #6f6860; margin: .35rem 0; font-size: .9rem; }
 .certificate-name { font-size: clamp(2rem, 4.8vw, 4rem); line-height: 1.12; margin: .35rem 0; color: var(--tier-ink); text-shadow: 1px 1px 0 #fff, 2px 2px 2px #b49b7752; }
 .certificate-flourish { font-size: 1.8rem; color: #a7834e; margin: .25rem 0; }
+.certificate-rainbow { width: 76px; height: 36px; flex: none; margin: .1rem 0 .3rem; }
 .certificate-description { max-width: 620px; line-height: 1.6; margin: .5rem auto 1rem; color: #455159; }
 .certificate-assets { display: flex; justify-content: center; flex-wrap: wrap; gap: .8rem 1.15rem; width: 100%; margin: .6rem auto .25rem; }
 .certificate-asset { width: 86px; display: flex; flex-direction: column; align-items: center; gap: .25rem; color: #7d633f; }

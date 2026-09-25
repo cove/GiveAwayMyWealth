@@ -12,6 +12,7 @@ type CertificateDetails = {
 
 const xml = (text: string) => text.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[character] ?? character);
 const money = (amount: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
+export const rainbowBands = ["#d65a57", "#e6974d", "#e7c665", "#64a786", "#599ac8", "#9873af"] as const;
 
 export function wealthLevel(amount: number) {
   if (amount > 900_000_000) return "Camel Through the Needle’s Eye";
@@ -67,6 +68,12 @@ export function certificateSvg(details: CertificateDetails) {
   const endDate = new Date(details.receipt.started.getTime() + 86_400_000).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
   const giftNote = details.giftNote.trim().replace(/\s+/g, " ");
   const note = gift && giftNote ? '<text x="600" y="685" text-anchor="middle" font-family="Georgia,serif" font-size="20" font-style="italic" fill="#755a39">“' + xml(giftNote.length > 70 ? giftNote.slice(0, 69) + "…" : giftNote) + '”</text>' : "";
+  const flourish = details.noLicense
+    ? rainbowBands.map((color, index) => {
+        const radius = 30 - index * 3;
+        return '<path d="M' + (600 - radius) + ' 590 Q600 ' + (590 - radius * 2) + ' ' + (600 + radius) + ' 590" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round"/>';
+      }).join("")
+    : '<text x="600" y="589" text-anchor="middle" font-family="Georgia,serif" font-size="29" fill="#a57f49">✦</text>';
   const nameScale = name.length > 27 ? ' textLength="870" lengthAdjust="spacingAndGlyphs"' : "";
 
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Commemorative certificate">' +
@@ -84,7 +91,7 @@ export function certificateSvg(details: CertificateDetails) {
     '<text x="600" y="422" text-anchor="middle" font-family="Georgia,serif" font-size="43" fill="#263b48">' + subtitle + "</text>" +
     '<text x="600" y="474" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#746a5e">Presented with great ceremony to</text>' +
     '<text x="600" y="548" text-anchor="middle" font-family="Georgia,serif" font-size="61" fill="' + palette.ink + '" filter="url(#emboss)"' + nameScale + ">" + name + "</text>" +
-    '<text x="600" y="589" text-anchor="middle" font-family="Georgia,serif" font-size="29" fill="#a57f49">✦</text>' +
+    flourish +
     '<text x="600" y="619" text-anchor="middle" font-family="Georgia,serif" font-size="20" fill="#48555c">' + xml(mainLine) + "</text>" +
     '<text x="600" y="647" text-anchor="middle" font-family="Georgia,serif" font-size="20" fill="#48555c">' + xml(secondLine) + "</text>" +
     assets + total +
