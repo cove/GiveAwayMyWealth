@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, CarFront, ChartNoAxesCombined, Gem, House, Landmark, Palette, Sailboat } from "lucide-react";
 import { trustClauses } from "@/lib/trust-wording";
-import { assetIconPath, certificateSvg, wealthLevel } from "@/lib/certificate-svg";
+import { assetIconPath, certificateSvg, wealthLevel, wealthTierColor } from "@/lib/certificate-svg";
 import "./enroll.css";
 
 type Mode = "self" | "gift";
@@ -33,7 +33,7 @@ function TrustInstrument({ assets, noLicense, signature, receipt }: { assets: As
 
 function EmbossedCertificate({ mode, receipt, recipient, signature, billingName, giftNote, assets, estimated, noLicense }: { mode: Mode; receipt: Receipt; recipient: string; signature: string; billingName: string; giftNote: string; assets: Asset[]; estimated: number; noLicense: boolean }) {
   const isGift = mode === "gift";
-  return <div className="certificate embossed-certificate" aria-label="Commemorative certificate">
+  return <div className={"certificate embossed-certificate tier-" + (isGift ? "gold" : wealthTierColor(estimated))} aria-label="Commemorative certificate">
     <div className="certificate-inner">
       <div className="certificate-masthead"><span>GIVEAWAYMYWEALTH</span><span>PRIVATE CLIENT OFFICE · EST. FOR ONE DAY</span></div>
       <div className="certificate-seal" aria-hidden="true"><span>G</span></div>
@@ -64,7 +64,6 @@ export default function Enroll() {
   const [authorityAccepted, setAuthorityAccepted] = useState(false);
   const [billingName, setBillingName] = useState("");
   const [billingEmail, setBillingEmail] = useState("");
-  const [billingZip, setBillingZip] = useState("");
   const [recipient, setRecipient] = useState("");
   const [companionName, setCompanionName] = useState("");
   const [giftNote, setGiftNote] = useState("");
@@ -104,7 +103,7 @@ export default function Enroll() {
     setBillingName(signature.trim()); next(3);
   };
   const finish = () => {
-    if (!billingName.trim() || !billingEmail.includes("@") || !/^\d{5}$/.test(billingZip)) { setError("Enter a name, email address and five-digit ZIP code."); return; }
+    if (!billingName.trim() || !billingEmail.includes("@")) { setError("Enter a name and email address."); return; }
     if (mode === "gift" && !recipient.trim()) { setError("Enter the name to place on the gift card."); return; }
     if (companion && !companionName.trim()) { setError("Enter the companion’s name for their invitation."); return; }
     if (!checkoutAccepted) { setError("Confirm the checkout terms before continuing."); return; }
@@ -165,7 +164,7 @@ export default function Enroll() {
         {step === 3 && <section className="panel" aria-labelledby="checkout-heading"><span className="eyebrow">{mode === "gift" ? "02" : "04"} / Checkout</span><h2 id="checkout-heading" className="serif panel-title">The final formality.</h2><p className="panel-intro">Review your details and payment preference. No charge is processed and no order details leave this browser tab.</p>
           {mode === "gift" && <div className="checkout-block"><h3 className="serif">Personalize the gift</h3><div className="field-grid"><div className="field"><label htmlFor="recipient">Recipient name *</label><Input id="recipient" className="field-control" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="For the person who has everything"/></div><div className="field"><label htmlFor="gift-from">From</label><Input id="gift-from" className="field-control" value={billingName} onChange={(e) => setBillingName(e.target.value)} placeholder="Your name"/></div><div className="field full"><label htmlFor="gift-note">A note to accompany the card</label><Textarea id="gift-note" className="field-control" value={giftNote} onChange={(e) => setGiftNote(e.target.value)} rows={3} placeholder="May your worries be as light as a tea bag."/></div></div></div>}
           {mode === "self" && companion && <div className="checkout-block"><h3 className="serif">Companion invitation</h3><p>We will prepare an invitation you can copy or print; the companion enrolls separately.</p><div className="field"><label htmlFor="companion-name">Companion name *</label><Input id="companion-name" className="field-control" value={companionName} onChange={(e) => setCompanionName(e.target.value)} placeholder="Their name"/></div></div>}
-          <div className="checkout-block"><h3 className="serif">Contact & billing</h3><div className="field-grid"><div className="field"><label htmlFor="bill-name">Name *</label><Input id="bill-name" className="field-control" value={billingName} onChange={(e) => setBillingName(e.target.value)} placeholder="Your name"/></div><div className="field"><label htmlFor="bill-email">Email *</label><Input id="bill-email" className="field-control" type="email" value={billingEmail} onChange={(e) => setBillingEmail(e.target.value)} placeholder="example@example.com"/></div><div className="field"><label htmlFor="bill-zip">ZIP code *</label><Input id="bill-zip" className="field-control" inputMode="numeric" maxLength={5} value={billingZip} onChange={(e) => setBillingZip(e.target.value)} placeholder="00000"/></div></div><p className="input-note">These entries remain in this browser tab; no contact details are submitted.</p></div>
+          <div className="checkout-block"><h3 className="serif">Contact & billing</h3><div className="field-grid"><div className="field"><label htmlFor="bill-name">Name *</label><Input id="bill-name" className="field-control" value={billingName} onChange={(e) => setBillingName(e.target.value)} placeholder="Your name"/></div><div className="field"><label htmlFor="bill-email">Email *</label><Input id="bill-email" className="field-control" type="email" value={billingEmail} onChange={(e) => setBillingEmail(e.target.value)} placeholder="example@example.com"/></div></div><p className="input-note">These entries remain in this browser tab; no contact details are submitted.</p></div>
           <div className="checkout-block"><h3 className="serif">Payment preference</h3><RadioGroup value={payment} onValueChange={setPayment} aria-label="Payment preference"><label className="payment-option"><RadioGroupItem value="card"/><span><b>Reference card</b><small>•••• 4242 · no card information required</small></span></label><label className="payment-option"><RadioGroupItem value="invoice"/><span><b>Private client invoice</b><small>No invoice is issued</small></span></label></RadioGroup></div>
           <label className="confirm-row"><Checkbox checked={checkoutAccepted} onCheckedChange={(value) => setCheckoutAccepted(Boolean(value))}/><span>I understand that this checkout creates no trust or transfer of assets or liabilities, takes no payment, and does not restrict access.</span></label>
           {error && <p className="form-error" role="alert">{error}</p>}
